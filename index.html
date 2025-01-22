@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Referrals</title>
     <style>
@@ -152,8 +152,6 @@
         function init() {
             Telegram.WebApp.ready(() => {
                 const user = {
-                    uid: "",
-                    telegram_id: "", // معرف المستخدم لتليجرام سيتم تعيينه لاحقًا
                     referrals: {
                         ref1: { firstName: "John", lastName: "Doe", addedValue: 100, userImage: "" },
                         ref2: { firstName: "Jane", lastName: "Smith", addedValue: 200, userImage: "" }
@@ -162,12 +160,12 @@
 
                 // الحصول على معرف المستخدم من بيانات Telegram
                 if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-                    user.telegram_id = Telegram.WebApp.initDataUnsafe.user.id;
-                    user.uid = user.telegram_id; // إذا كنت تستخدم نفس معرف تليجرام كـ UID للمستخدم في Firebase
+                    const telegramId = Telegram.WebApp.initDataUnsafe.user.id;
 
                     const botUsername = "X_Hasan_Cr194BOT"; // يوزر البوت
-                    const refLink = `https://t.me/${botUsername}?start=ref_${user.telegram_id}`;
+                    const refLink = `https://t.me/${botUsername}?start=ref_${telegramId}`;
                     document.getElementById("refLink").innerText = refLink;
+                    
                     const totalReferrals = Object.keys(user.referrals).length;
                     document.getElementById("totalReferrals").innerText = totalReferrals;
 
@@ -189,8 +187,6 @@
                         referralsList.appendChild(referralItem);
                     });
 
-                    document.getElementById("content").style.display = "block";
-
                     document.getElementById("copyButton").addEventListener("click", () => {
                         navigator.clipboard.writeText(refLink).then(() => {
                             alert("Link copied to clipboard!");
@@ -201,7 +197,6 @@
                 } else {
                     console.error("Telegram Web App data is not available.");
                     document.getElementById("content").innerHTML = "<p class='text-center text-white'>Unable to load Telegram data.</p>";
-                    document.getElementById("content").style.display = "block";
                 }
             });
         }
@@ -209,4 +204,4 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-</html>
+    </html>
