@@ -74,7 +74,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-        <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         // إعداد Firebase
         const firebaseConfig = {
@@ -112,7 +112,9 @@
                         const querySnapshot = db.collection("users").doc(userId).get();
                         if (querySnapshot.exists) {
                             const data = querySnapshot.data();
-                            referrals.push(...data.referrals);
+                            if (data && data.referrals) {
+                                referrals.push(...data.referrals);
+                            }
                         }
                     } catch (error) {
                         console.error("Error fetching referrals:", error);
@@ -169,9 +171,8 @@
         </div>
         <div class="referrals-section mt-6">
             <p class="text-2xl font-bold text-center mb-4">All Referrals by Balance</p>
-<div id="referralsList" class="referrals-list"></div>
-</div>
-</div>
+            <div id="referralsList" class="referrals-list"></div>
+        </div>
+    </div>
 </body>
-
 </html>
