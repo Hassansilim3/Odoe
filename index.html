@@ -32,176 +32,135 @@
         .text-xl {
             font-size: 1.25rem;
         }
-        .text-2xl {
-            font-size: 1.5rem;
-        }
         .text-4xl {
             font-size: 2.25rem;
         }
         .font-bold {
             font-weight: bold;
         }
-        .flex {
-            display: flex;
+        .referrals-section {
+            margin-top: 30px;
         }
-        .justify-center {
-            justify-content: center;
-        }
-        .items-center {
-            align-items: center;
-        }
-        .bg-blue-500 {
-            background-color: #3498db;
-        }
-        .bg-gray-800 {
+        .referrals-list {
             background-color: #2d2d2d;
-        }
-        .bg-gray-900 {
-            background-color: #1c1c1c;
-        }
-        .bg-black {
-            background-color: #000;
-        }
-        .rounded-lg {
-            border-radius: 0.5rem;
-        }
-        .p-2 {
-            padding: 0.5rem;
-        }
-        .py-2 {
-            padding-top: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-        .px-4 {
-            padding-left: 1rem;
-            padding-right: 1rem;
-        }
-        .mb-24 {
-            margin-bottom: 24px;
-        }
-        .text-white {
-            color: white;
-        }
-        .overflow-hidden {
-            overflow: hidden;
-        }
-        .overflow-y-auto {
+            padding: 10px;
+            border-radius: 6px;
+            max-height: 300px;
             overflow-y: auto;
         }
-        .hide-scrollbar::-webkit-scrollbar {
-            display: none;
+        .referral-item {
+            background-color: #3a3a3a;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
         }
-        .truncate {
+        .referral-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            background-color: #555;
+            text-align: center;
+            line-height: 40px;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .referral-balance {
+            color: #ffcc00;
         }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body>
-    <div class="container">
-        <div class="content" id="content">
-            <div class="referrals-info text-center mt-4">
-                <p class="total-referrals text-xl font-bold">Total Referrals: <span id="totalReferrals">0</span></p>
-            </div>
-
-            <!-- Invite friends section -->
-            <p class="invite-friends-title text-center font-bold text-4xl mt-4">Invite friends</p>
-            <p class="invite-description text-center mt-4 mx-4">You can receive 10% of your invited friend's mined coins</p>
-            
-            <!-- Referral link and copy button -->
-            <div class="flex justify-center mt-6">
-                <div class="bg-gray-800 rounded-lg p-4 w-full max-w-md text-center">
-                    <p class="mb-4">Referral Link</p>
-                    <p id="refLink" class="bg-black p-2 rounded text-white truncate"></p>
-                    <button id="copyButton" class="bg-blue-500 text-white py-2 px-4 mt-4 rounded-lg">Copy Referral Link</button>
-                </div>
-            </div>
-
-            <!-- All referrals section -->
-            <div class="all-referrals mt-8 mb-4 text-center">
-                <p class="all-referrals-title text-2xl font-bold">All Referrals by Balance</p>
-            </div>
-            <div class="referrals-list bg-gray-800 mx-4 py-2 mt-6 h-60 rounded-lg overflow-hidden overflow-y-auto hide-scrollbar mb-2" id="referralsList">
-                <!-- Referrals will be added here dynamically -->
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
     <script>
-        // Firebase configuration
+        // إعداد Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBekcFYAivjH934l0t0Z7bAILFcpghJ4Us",
             authDomain: "trex-b4169.firebaseapp.com",
             projectId: "trex-b4169",
             storageBucket: "trex-b4169.firebasestorage.app",
             messagingSenderId: "341755000409",
-            appId: "1:341755000409:web:2dd2922673392b47d4e348",
-            measurementId: "G-C5CMEE3W9E"
+            appId: "1:341755000409:web:2dd2922673392b47d4e348"
         };
-
-        // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
-        const analytics = firebase.analytics();
         const db = firebase.firestore();
 
-        function init() {
-            Telegram.WebApp.ready(() => {
-                const user = {
-                    referrals: {
-                        ref1: { firstName: "John", lastName: "Doe", addedValue: 100, userImage: "" },
-                        ref2: { firstName: "Jane", lastName: "Smith", addedValue: 200, userImage: "" }
-                    }
-                };
+        document.addEventListener("DOMContentLoaded", async () => {
+            const userId = "user123"; // استبدل بـ UID الحقيقي للمستخدم
+            const refLink = `https://t.me/X_Hasan_Cr194BOT?start=ref_${userId}`;
+            const referralsList = document.getElementById("referralsList");
+            const totalReferrals = document.getElementById("totalReferrals");
 
-                // الحصول على معرف المستخدم من بيانات Telegram
-                if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-                    const telegramId = Telegram.WebApp.initDataUnsafe.user.id;
+            // عرض رابط الإحالة
+            document.getElementById("refLink").innerText = refLink;
 
-                    const botUsername = "X_Hasan_Cr194BOT"; // يوزر البوت
-                    const refLink = `https://t.me/${botUsername}?start=ref_${telegramId}`;
-                    document.getElementById("refLink").innerText = refLink;
-                    
-                    const totalReferrals = Object.keys(user.referrals).length;
-                    document.getElementById("totalReferrals").innerText = totalReferrals;
-
-                    const referralsList = document.getElementById("referralsList");
-                    Object.entries(user.referrals).sort((a, b) => b[1].addedValue - a[1].addedValue).forEach(([key, value]) => {
-                        const referralItem = document.createElement("div");
-                        referralItem.classList.add("referral-item", "bg-gray-900", "p-2", "rounded-lg", "mx-2", "mb-1", "flex", "items-center");
-                        referralItem.innerHTML = `
-                            <div class="referral-icon flex-shrink-0 mr-2">
-                                <div class="border-2 border-yellow-700 overflow-hidden flex items-center justify-center rounded-full bg-gray-800 h-10 w-10">
-                                    ${value.userImage ? `<img class="w-9 h-9 object-contain" src="${value.userImage}" alt="${value.firstName[0].toUpperCase()}">` : `<div class="referral-initial text-xl text-white bg-black w-full h-full flex items-center justify-center">${value.firstName[0].toUpperCase()}</div>`}
-                                </div>
-                            </div>
-                            <div class="referral-info flex-grow min-w-0 flex items-center justify-between">
-                                <p class="text-white font-bold truncate mr-2">${value.firstName} ${value.lastName}</p>
-                                <p class="text-white whitespace-nowrap flex-shrink-0">${(value.addedValue).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</p>
-                            </div>
-                        `;
-                        referralsList.appendChild(referralItem);
-                    });
-
-                    document.getElementById("copyButton").addEventListener("click", () => {
-                        navigator.clipboard.writeText(refLink).then(() => {
-                            alert("Link copied to clipboard!");
-                        }).catch(err => {
-                            console.error("Failed to copy:", err);
-                        });
-                    });
-                } else {
-                    console.error("Telegram Web App data is not available.");
-                    document.getElementById("content").innerHTML = "<p class='text-center text-white'>Unable to load Telegram data.</p>";
-                }
+            document.getElementById("copyButton").addEventListener("click", () => {
+                navigator.clipboard.writeText(refLink).then(() => {
+                    alert("Referral link copied!");
+                });
             });
-        }
 
-        document.addEventListener('DOMContentLoaded', init);
+            // جلب الإحالات من Firebase
+            const referrals = [];
+            try {
+                const querySnapshot = await db.collection("users").doc(userId).get();
+                if (querySnapshot.exists) {
+                    const data = querySnapshot.data();
+                    referrals.push(...data.referrals);
+                }
+            } catch (error) {
+                console.error("Error fetching referrals:", error);
+            }
+
+            // عرض الإحالات
+            if (referrals.length > 0) {
+                referrals.sort((a, b) => b.addedValue - a.addedValue);
+                referrals.forEach(ref => {
+                    const listItem = document.createElement("div");
+                    listItem.classList.add("referral-item");
+
+                    const avatar = document.createElement("div");
+                    avatar.classList.add("referral-avatar");
+                    avatar.textContent = ref.firstName[0].toUpperCase();
+
+                    const name = document.createElement("p");
+                    name.textContent = `${ref.firstName} ${ref.lastName}`;
+                    name.style.flex = "1";
+
+                    const balance = document.createElement("p");
+                    balance.classList.add("referral-balance");
+                    balance.textContent = `+${ref.addedValue.toFixed(2)}🦖`;
+
+                    listItem.appendChild(avatar);
+                    listItem.appendChild(name);
+                    listItem.appendChild(balance);
+
+                    referralsList.appendChild(listItem);
+                });
+            } else {
+                referralsList.innerHTML = "<p>No referrals yet.</p>";
+            }
+
+            totalReferrals.textContent = referrals.length;
+        });
     </script>
+</head>
+<body>
+    <div class="container">
+        <div class="text-center mt-4">
+            <p class="text-xl font-bold">Total Referrals: <span id="totalReferrals">0</span></p>
+        </div>
+        <p class="text-center text-4xl font-bold mt-4">Invite Friends</p>
+        <p class="text-center mt-4">You can receive 10% of your invited friend's mined coins</p>
+        <div class="text-center mt-6">
+            <p id="refLink" style="word-break: break-all;">Generating link...</p>
+            <button id="copyButton" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Copy Referral Link</button>
+        </div>
+        <div class="referrals-section mt-6">
+            <p class="text-2xl font-bold text-center mb-4">All Referrals by Balance</p>
+            <div id="referralsList" class="referrals-list"></div>
+        </div>
+    </div>
 </body>
 </html>
