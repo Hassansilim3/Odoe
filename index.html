@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Referrals</title>
     <style>
@@ -165,7 +165,8 @@
                     user.telegram_id = Telegram.WebApp.initDataUnsafe.user.id;
                     user.uid = user.telegram_id; // إذا كنت تستخدم نفس معرف تليجرام كـ UID للمستخدم في Firebase
 
-                    const refLink = `https://t.me/Rex_CoinBot?start=ref_${user.telegram_id}`;
+                    const botUsername = "X_Hasan_Cr194BOT"; // يوزر البوت
+                    const refLink = `https://t.me/${botUsername}?start=ref_${user.telegram_id}`;
                     document.getElementById("refLink").innerText = refLink;
                     const totalReferrals = Object.keys(user.referrals).length;
                     document.getElementById("totalReferrals").innerText = totalReferrals;
@@ -208,4 +209,4 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-                    </html>
+</html>
