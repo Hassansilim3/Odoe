@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Referrals</title>
+    <style>
+        /* CSS Styles */
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .mt-4 {
+            margin-top: 16px;
+        }
+        .mt-6 {
+            margin-top: 24px;
+        }
+        .mb-4 {
+            margin-bottom: 16px;
+        }
+        .text-xl {
+            font-size: 1.25rem;
+        }
+        .text-2xl {
+            font-size: 1.5rem;
+        }
+        .text-4xl {
+            font-size: 2.25rem;
+        }
+        .font-bold {
+            font-weight: bold;
+        }
+        .flex {
+            display: flex;
+        }
+        .justify-center {
+            justify-content: center;
+        }
+        .items-center {
+            align-items: center;
+        }
+        .h-screen {
+            height: 100vh;
+        }
+        .bg-blue-500 {
+            background-color: #3498db;
+        }
+        .bg-gray-800 {
+            background-color: #2d2d2d;
+        }
+        .bg-gray-900 {
+            background-color: #1c1c1c;
+        }
+        .bg-black {
+            background-color: #000;
+        }
+        .rounded-lg {
+            border-radius: 0.5rem;
+        }
+        .p-2 {
+            padding: 0.5rem;
+        }
+        .py-2 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .px-4 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .mb-24 {
+            margin-bottom: 24px;
+        }
+        .text-white {
+            color: white;
+        }
+        .overflow-hidden {
+            overflow: hidden;
+        }
+        .overflow-y-auto {
+            overflow-y: auto;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="content" id="content" style="display: none;">
+            <div class="referrals-info text-center mt-4">
+                <p class="total-referrals text-xl font-bold">Total Referrals: <span id="totalReferrals">0</span></p>
+            </div>
+
+            <!-- Invite friends section -->
+            <p class="invite-friends-title text-center font-bold text-4xl mt-4">Invite friends</p>
+            <p class="invite-description text-center mt-4 mx-4">You can receive 10% of your invited friend's mined coins</p>
+            
+            <!-- Referral link and copy button -->
+            <div class="flex justify-center mt-6">
+                <div class="bg-gray-800 rounded-lg p-4 w-full max-w-md text-center">
+                    <p class="mb-4">Referral Link</p>
+                    <p id="refLink" class="bg-black p-2 rounded text-white truncate">https://t.me/Rex_CoinBot?start=ref_user123</p>
+                    <button id="copyButton" class="bg-blue-500 text-white py-2 px-4 mt-4 rounded-lg">Copy Referral Link</button>
+                </div>
+            </div>
+            
+            <!-- Invite friends rewards section -->
+            <div class="invite-friend bg-gray-800 mt-6 mx-4 rounded-lg p-2 flex items-center">
+                <div class="invite-friend-icon">
+                    <img class="invite-friend-gift w-20 h-20 object-contain" src="path/to/gift.png" alt="Gift">
+                </div>
+                <div class="invite-friend-info mx-3 w-full">
+                    <p class="invite-title text-lg font-bold">Invite a friend</p>
+                    <p class="invite-reward font-bold">+🦖 100,00</p>
+                </div>
+            </div>
+
+            <!-- All referrals section -->
+            <div class="all-referrals mt-8 mb-4 text-center">
+                <p class="all-referrals-title text-2xl font-bold">All Referrals by Balance</p>
+            </div>
+            <div class="referrals-list bg-gray-800 mx-4 py-2 mt-6 h-60 rounded-lg overflow-hidden overflow-y-auto hide-scrollbar mb-2" id="referralsList">
+                <!-- Referrals will be added here dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBekcFYAivjH934l0t0Z7bAILFcpghJ4Us",
+            authDomain: "trex-b4169.firebaseapp.com",
+            projectId: "trex-b4169",
+            storageBucket: "trex-b4169.firebasestorage.app",
+            messagingSenderId: "341755000409",
+            appId: "1:341755000409:web:2dd2922673392b47d4e348",
+            measurementId: "G-C5CMEE3W9E"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.analytics();
+        const db = firebase.firestore();
+
+        function init() {
+            Telegram.WebApp.ready(() => {
+                const user = {
+                    uid: "",
+                    telegram_id: "", // معرف المستخدم لتليجرام سيتم تعيينه لاحقًا
+                    referrals: {
+                        ref1: { firstName: "John", lastName: "Doe", addedValue: 100, userImage: "" },
+                        ref2: { firstName: "Jane", lastName: "Smith", addedValue: 200, userImage: "" }
+                    }
+                };
+
+                // الحصول على معرف المستخدم من بيانات Telegram
+                if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+                    user.telegram_id = Telegram.WebApp.initDataUnsafe.user.id;
+                    user.uid = user.telegram_id; // إذا كنت تستخدم نفس معرف تليجرام كـ UID للمستخدم في Firebase
+
+                    const refLink = `https://t.me/Rex_CoinBot?start=ref_${user.telegram_id}`;
+                    document.getElementById("refLink").innerText = refLink;
+                    const totalReferrals = Object.keys(user.referrals).length;
+                    document.getElementById("totalReferrals").innerText = totalReferrals;
+
+                    const referralsList = document.getElementById("referralsList");
+                    Object.entries(user.referrals).sort((a, b) => b[1].addedValue - a[1].addedValue).forEach(([key, value]) => {
+                        const referralItem = document.createElement("div");
+                        referralItem.classList.add("referral-item", "bg-gray-900", "p-2", "rounded-lg", "mx-2", "mb-1", "flex", "items-center");
+                        referralItem.innerHTML = `
+                            <div class="referral-icon flex-shrink-0 mr-2">
+                                <div class="border-2 border-yellow-700 overflow-hidden flex items-center justify-center rounded-full bg-gray-800 h-10 w-10">
+                                    ${value.userImage ? `<img class="w-9 h-9 object-contain" src="${value.userImage}" alt="${value.firstName[0].toUpperCase()}">` : `<div class="referral-initial text-xl text-white bg-black w-full h-full flex items-center justify-center">${value.firstName[0].toUpperCase()}</div>`}
+                                </div>
+                            </div>
+                            <div class="referral-info flex-grow min-w-0 flex items-center justify-between">
+                                <p class="text-white font-bold truncate mr-2">${value.firstName} ${value.lastName}</p>
+                                <p class="text-white whitespace-nowrap flex-shrink-0">${(value.addedValue).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</p>
+                            </div>
+                        `;
+                        referralsList.appendChild(referralItem);
+                    });
+
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("content").style.display = "block";
+
+                    document.getElementById("copyButton").addEventListener("click", () => {
+                        navigator.clipboard.writeText(refLink).then(() => {
+                            alert("Link copied to clipboard!");
+                        }).catch(err => {
+                            console.error("Failed to copy:", err);
+                        });
+                    });
+                } else {
+                    console.error("Telegram Web App data is not available.");
+                    document.getElementById("loading").style.display = "none";
+                    document.getElementById("content").innerHTML = "<p class='text-center text-white'>Unable to load Telegram data.</p>";
+                    document.getElementById("content").style.display = "block";
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+  </html>
