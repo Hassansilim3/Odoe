@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Referrals</title>
     <style>
-        /* CSS Styles */
         body {
             background-color: #1a1a1a;
             color: white;
@@ -95,28 +94,17 @@
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .truncate {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
     </style>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <div class="container">
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-        </div>
-
-        <div class="content" id="content" style="display: none;">
+        <div class="content" id="content">
             <div class="referrals-info text-center mt-4">
                 <p class="total-referrals text-xl font-bold">Total Referrals: <span id="totalReferrals">0</span></p>
             </div>
@@ -131,17 +119,6 @@
                     <p class="mb-4">Referral Link</p>
                     <p id="refLink" class="bg-black p-2 rounded text-white truncate">https://t.me/Rex_CoinBot?start=ref_user123</p>
                     <button id="copyButton" class="bg-blue-500 text-white py-2 px-4 mt-4 rounded-lg">Copy Referral Link</button>
-                </div>
-            </div>
-            
-            <!-- Invite friends rewards section -->
-            <div class="invite-friend bg-gray-800 mt-6 mx-4 rounded-lg p-2 flex items-center">
-                <div class="invite-friend-icon">
-                    <img class="invite-friend-gift w-20 h-20 object-contain" src="path/to/gift.png" alt="Gift">
-                </div>
-                <div class="invite-friend-info mx-3 w-full">
-                    <p class="invite-title text-lg font-bold">Invite a friend</p>
-                    <p class="invite-reward font-bold">+🦖 100,00</p>
                 </div>
             </div>
 
@@ -214,7 +191,6 @@
                         referralsList.appendChild(referralItem);
                     });
 
-                    document.getElementById("loading").style.display = "none";
                     document.getElementById("content").style.display = "block";
 
                     document.getElementById("copyButton").addEventListener("click", () => {
@@ -226,7 +202,6 @@
                     });
                 } else {
                     console.error("Telegram Web App data is not available.");
-                    document.getElementById("loading").style.display = "none";
                     document.getElementById("content").innerHTML = "<p class='text-center text-white'>Unable to load Telegram data.</p>";
                     document.getElementById("content").style.display = "block";
                 }
@@ -236,4 +211,4 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-  </html>
+        </html>
