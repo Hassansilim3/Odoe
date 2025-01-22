@@ -71,8 +71,10 @@
             color: #ffcc00;
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+        <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         // إعداد Firebase
         const firebaseConfig = {
@@ -81,68 +83,76 @@
             projectId: "trex-b4169",
             storageBucket: "trex-b4169.firebasestorage.app",
             messagingSenderId: "341755000409",
-            appId: "1:341755000409:web:2dd2922673392b47d4e348"
+            appId: "1:341755000409:web:2dd2922673392b47d4e348",
+            measurementId: "G-C5CMEE3W9E"
         };
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         document.addEventListener("DOMContentLoaded", async () => {
-            const userId = "user123"; // استبدل بـ UID الحقيقي للمستخدم
-            const refLink = `https://t.me/X_Hasan_Cr194BOT?start=ref_${userId}`;
-            const referralsList = document.getElementById("referralsList");
-            const totalReferrals = document.getElementById("totalReferrals");
+            Telegram.WebApp.ready(() => {
+                if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
+                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
+                    const refLink = `https://t.me/X_Hasan_Cr194BOT?start=ref_${userId}`;
+                    const referralsList = document.getElementById("referralsList");
+                    const totalReferrals = document.getElementById("totalReferrals");
 
-            // عرض رابط الإحالة
-            document.getElementById("refLink").innerText = refLink;
+                    // عرض رابط الإحالة
+                    document.getElementById("refLink").innerText = refLink;
 
-            document.getElementById("copyButton").addEventListener("click", () => {
-                navigator.clipboard.writeText(refLink).then(() => {
-                    alert("Referral link copied!");
-                });
-            });
+                    document.getElementById("copyButton").addEventListener("click", () => {
+                        navigator.clipboard.writeText(refLink).then(() => {
+                            alert("Referral link copied!");
+                        });
+                    });
 
-            // جلب الإحالات من Firebase
-            const referrals = [];
-            try {
-                const querySnapshot = await db.collection("users").doc(userId).get();
-                if (querySnapshot.exists) {
-                    const data = querySnapshot.data();
-                    referrals.push(...data.referrals);
+                    // جلب الإحالات من Firebase
+                    const referrals = [];
+                    try {
+                        const querySnapshot = db.collection("users").doc(userId).get();
+                        if (querySnapshot.exists) {
+                            const data = querySnapshot.data();
+                            referrals.push(...data.referrals);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching referrals:", error);
+                    }
+
+                    // عرض الإحالات
+                    if (referrals.length > 0) {
+                        referrals.sort((a, b) => b.addedValue - a.addedValue);
+                        referrals.forEach(ref => {
+                            const listItem = document.createElement("div");
+                            listItem.classList.add("referral-item");
+
+                            const avatar = document.createElement("div");
+                            avatar.classList.add("referral-avatar");
+                            avatar.textContent = ref.firstName[0].toUpperCase();
+
+                            const name = document.createElement("p");
+                            name.textContent = `${ref.firstName} ${ref.lastName}`;
+                            name.style.flex = "1";
+
+                            const balance = document.createElement("p");
+                            balance.classList.add("referral-balance");
+                            balance.textContent = `+${ref.addedValue.toFixed(2)}🦖`;
+
+                            listItem.appendChild(avatar);
+                            listItem.appendChild(name);
+                            listItem.appendChild(balance);
+
+                            referralsList.appendChild(listItem);
+                        });
+                    } else {
+                        referralsList.innerHTML = "<p>No referrals yet.</p>";
+                    }
+
+                    totalReferrals.textContent = referrals.length;
+                } else {
+                    console.error("Telegram Web App data is not available.");
+                    document.getElementById("content").innerHTML = "<p class='text-center text-white'>Unable to load Telegram data.</p>";
                 }
-            } catch (error) {
-                console.error("Error fetching referrals:", error);
-            }
-
-            // عرض الإحالات
-            if (referrals.length > 0) {
-                referrals.sort((a, b) => b.addedValue - a.addedValue);
-                referrals.forEach(ref => {
-                    const listItem = document.createElement("div");
-                    listItem.classList.add("referral-item");
-
-                    const avatar = document.createElement("div");
-                    avatar.classList.add("referral-avatar");
-                    avatar.textContent = ref.firstName[0].toUpperCase();
-
-                    const name = document.createElement("p");
-                    name.textContent = `${ref.firstName} ${ref.lastName}`;
-                    name.style.flex = "1";
-
-                    const balance = document.createElement("p");
-                    balance.classList.add("referral-balance");
-                    balance.textContent = `+${ref.addedValue.toFixed(2)}🦖`;
-
-                    listItem.appendChild(avatar);
-                    listItem.appendChild(name);
-                    listItem.appendChild(balance);
-
-                    referralsList.appendChild(listItem);
-                });
-            } else {
-                referralsList.innerHTML = "<p>No referrals yet.</p>";
-            }
-
-            totalReferrals.textContent = referrals.length;
+            });
         });
     </script>
 </head>
@@ -159,8 +169,9 @@
         </div>
         <div class="referrals-section mt-6">
             <p class="text-2xl font-bold text-center mb-4">All Referrals by Balance</p>
-            <div id="referralsList" class="referrals-list"></div>
-        </div>
-    </div>
+<div id="referralsList" class="referrals-list"></div>
+</div>
+</div>
 </body>
-</html>
+
+    </html>
