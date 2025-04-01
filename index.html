@@ -1,178 +1,51 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Referrals</title>
+    <title>Telegram Mini App - Referral</title>
     <style>
         body {
-            background-color: #1a1a1a;
-            color: white;
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
+            text-align: center;
+            margin: 50px;
         }
         .container {
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 400px;
+            margin: auto;
             padding: 20px;
-        }
-        .text-center {
-            text-align: center;
-        }
-        .mt-4 {
-            margin-top: 16px;
-        }
-        .mt-6 {
-            margin-top: 24px;
-        }
-        .mb-4 {
-            margin-bottom: 16px;
-        }
-        .text-xl {
-            font-size: 1.25rem;
-        }
-        .text-4xl {
-            font-size: 2.25rem;
-        }
-        .font-bold {
-            font-weight: bold;
-        }
-        .referrals-section {
-            margin-top: 30px;
-        }
-        .referrals-list {
-            background-color: #2d2d2d;
-            padding: 10px;
-            border-radius: 6px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .referral-item {
-            background-color: #3a3a3a;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .referral-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            overflow: hidden;
-            background-color: #555;
-            text-align: center;
-            line-height: 40px;
-            color: white;
-            font-size: 1.2rem;
-        }
-        .referral-balance {
-            color: #ffcc00;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
         }
     </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script>
-        // إعداد Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBekcFYAivjH934l0t0Z7bAILFcpghJ4Us",
-            authDomain: "trex-b4169.firebaseapp.com",
-            projectId: "trex-b4169",
-            storageBucket: "trex-b4169.firebasestorage.app",
-            messagingSenderId: "341755000409",
-            appId: "1:341755000409:web:2dd2922673392b47d4e348",
-            measurementId: "G-C5CMEE3W9E"
-        };
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        document.addEventListener("DOMContentLoaded", async () => {
-            Telegram.WebApp.ready(() => {
-                if (Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user) {
-                    const userId = Telegram.WebApp.initDataUnsafe.user.id;
-                    const refLink = `https://t.me/X_Hasan_Cr194BOT?start=ref_${userId}`;
-                    const referralsList = document.getElementById("referralsList");
-                    const totalReferrals = document.getElementById("totalReferrals");
-
-                    // عرض رابط الإحالة
-                    document.getElementById("refLink").innerText = refLink;
-
-                    document.getElementById("copyButton").addEventListener("click", () => {
-                        navigator.clipboard.writeText(refLink).then(() => {
-                            alert("Referral link copied!");
-                        });
-                    });
-
-                    // جلب الإحالات من Firebase
-                    const referrals = [];
-                    try {
-                        const querySnapshot = db.collection("users").doc(userId).get();
-                        if (querySnapshot.exists) {
-                            const data = querySnapshot.data();
-                            if (data && data.referrals) {
-                                referrals.push(...data.referrals);
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Error fetching referrals:", error);
-                    }
-
-                    // عرض الإحالات
-                    if (referrals.length > 0) {
-                        referrals.sort((a, b) => b.addedValue - a.addedValue);
-                        referrals.forEach(ref => {
-                            const listItem = document.createElement("div");
-                            listItem.classList.add("referral-item");
-
-                            const avatar = document.createElement("div");
-                            avatar.classList.add("referral-avatar");
-                            avatar.textContent = ref.firstName[0].toUpperCase();
-
-                            const name = document.createElement("p");
-                            name.textContent = `${ref.firstName} ${ref.lastName}`;
-                            name.style.flex = "1";
-
-                            const balance = document.createElement("p");
-                            balance.classList.add("referral-balance");
-                            balance.textContent = `+${ref.addedValue.toFixed(2)}🦖`;
-
-                            listItem.appendChild(avatar);
-                            listItem.appendChild(name);
-                            listItem.appendChild(balance);
-
-                            referralsList.appendChild(listItem);
-                        });
-                    } else {
-                        referralsList.innerHTML = "<p>No referrals yet.</p>";
-                    }
-
-                    totalReferrals.textContent = referrals.length;
-                } else {
-                    console.error("Telegram Web App data is not available.");
-                    document.getElementById("content").innerHTML = "<p class='text-center text-white'>Unable to load Telegram data.</p>";
-                }
-            });
-        });
-    </script>
 </head>
 <body>
     <div class="container">
-        <div class="text-center mt-4">
-            <p class="text-xl font-bold">Total Referrals: <span id="totalReferrals">0</span></p>
-        </div>
-        <p class="text-center text-4xl font-bold mt-4">Invite Friends</p>
-        <p class="text-center mt-4">You can receive 10% of your invited friend's mined coins</p>
-        <div class="text-center mt-6">
-            <p id="refLink" style="word-break: break-all;">Generating link...</p>
-            <button id="copyButton" class="bg-blue-500 text-white py-2 px-4 rounded-lg">Copy Referral Link</button>
-        </div>
-        <div class="referrals-section mt-6">
-            <p class="text-2xl font-bold text-center mb-4">All Referrals by Balance</p>
-            <div id="referralsList" class="referrals-list"></div>
-        </div>
-    </div>
+        <h2>نظام الإحالة</h2>
+        <p id="user_id">معرف المستخدم: غير معروف</p>
+        <p id="referral_link">رابط الإحالة: غير متاح</p>
+        <p id="score">عدد الإحالات: 0</p>
+    </div><script>
+    // الحصول على بيانات المستخدم من Telegram Mini App
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('user');
+    const referrer = urlParams.get('ref');
+    
+    if (userId) {
+        document.getElementById('user_id').textContent = `معرف المستخدم: ${userId}`;
+        document.getElementById('referral_link').textContent = `رابط الإحالة: ${window.location.origin}?ref=${userId}`;
+        
+        // حفظ بيانات الإحالة في Local Storage
+        let score = localStorage.getItem(`ref_score_${userId}`) || 0;
+        document.getElementById('score').textContent = `عدد الإحالات: ${score}`;
+    }
+    
+    if (referrer) {
+        let refScore = localStorage.getItem(`ref_score_${referrer}`) || 0;
+        refScore = parseInt(refScore) + 1;
+        localStorage.setItem(`ref_score_${referrer}`, refScore);
+    }
+</script>
+
 </body>
 </html>
