@@ -101,14 +101,17 @@
     // استخدام Telegram WebApp API إذا كان متوفرًا
     const telegramWebApp = window.Telegram ? window.Telegram.WebApp : null;
 
-    // الحصول على معرف المستخدم من Telegram إذا وُجد
-    let userId = telegramWebApp && telegramWebApp.initDataUnsafe && telegramWebApp.initDataUnsafe.user 
-                 ? telegramWebApp.initDataUnsafe.user.id 
-                 : null;
+    // التحقق من بيانات المستخدم المرسلة من Telegram WebApp API
+    let userId = null;
 
-    // إذا لم يوجد معرف المستخدم، قم باستخدام قيمة افتراضية للتجربة
+    if (telegramWebApp && telegramWebApp.initDataUnsafe && telegramWebApp.initDataUnsafe.user) {
+      userId = telegramWebApp.initDataUnsafe.user.id;
+    }
+
+    // إذا لم يكن هناك معرف للمستخدم، يمكنك إظهار رسالة خطأ أو التعامل مع الموقف بطريقة أخرى
     if (!userId) {
-      userId = 'defaultUser'; // أو أي قيمة أخرى ترغب فيها كمؤشر تجريبي
+      alert("لم يتم العثور على معرف المستخدم من Telegram.");
+      userId = 'unknownUser'; // معرّف افتراضي لحين التمكن من الحصول على بيانات المستخدم
     }
 
     // استرجاع معامل start من الرابط، وإذا لم يوجد يتم استخدام userId كرمز إحالة
@@ -213,28 +216,12 @@
       }
     });
 
-    // مثال توضيحي لتكامل CAPTCHA عند تسجيل الدعوات (يجب تنفيذ ذلك في الخادم)
-    // عند إرسال بيانات الدعوة إلى الخادم يمكن تضمين رمز CAPTCHA للتحقق من أن المستخدم ليس روبوتاً.
-    // مثال (غير مفعل هنا):
-    /*
-    function submitReferral() {
-      const captchaToken = grecaptcha.getResponse(); // باستخدام Google reCAPTCHA
-      fetch('https://yourserver.com/api/submitReferral', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user: startParam, captcha: captchaToken })
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Referral submitted', data);
-      })
-      .catch(err => console.error(err));
-    }
-    */
-    // لاحظ أن التحقق من صحة الـ CAPTCHA يجب أن يتم أيضًا في الخادم.
+    // إضافة آلية التحقق من الأمان للمشاركة
+    // قم بإضافة نظام CAPTCHA أو آلية تحقق من الروبوتات عند إرسال الدعوات
+    // يمكن تنفيذ ذلك باستخدام Google reCAPTCHA أو طرق أخرى للتحقق من صحة المستخدم.
 
     // ملاحظة أمنية:
     // ينصح بتقييد الدعوات من خلال التحقق من الـ IP ومنع المحاولات المتكررة باستخدام حلول خادم مثل rate limiting.
   </script>
 </body>
-  </html>
+</html>
