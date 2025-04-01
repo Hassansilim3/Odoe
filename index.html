@@ -101,17 +101,22 @@
     // استخدام Telegram WebApp API إذا كان متوفرًا
     const telegramWebApp = window.Telegram ? window.Telegram.WebApp : null;
 
-    // الحصول على معرف المستخدم من Telegram إذا وُجد، وإلا يتم استخدام معرف افتراضي
+    // الحصول على معرف المستخدم من Telegram إذا وُجد
     let userId = telegramWebApp && telegramWebApp.initDataUnsafe && telegramWebApp.initDataUnsafe.user 
                  ? telegramWebApp.initDataUnsafe.user.id 
-                 : '123456';
+                 : null;
+
+    // إذا لم يوجد معرف المستخدم، قم باستخدام قيمة افتراضية للتجربة
+    if (!userId) {
+      userId = 'defaultUser'; // أو أي قيمة أخرى ترغب فيها كمؤشر تجريبي
+    }
 
     // استرجاع معامل start من الرابط، وإذا لم يوجد يتم استخدام userId كرمز إحالة
     const urlParams = new URLSearchParams(window.location.search);
     let startParam = urlParams.get('start') || userId;
 
-    // تكوين رابط الإحالة للبوت (تأكد من استبدال YourBot بمعرف البوت الخاص بك)
-    const referralLink = `https://t.me/YourBot?start=${startParam}`;
+    // تكوين رابط الإحالة للبوت (استخدام معرف البوت الخاص بك)
+    const referralLink = `https://t.me/XHasanCr59BOT?start=${startParam}`;
     document.getElementById('referralLink').innerText = referralLink;
 
     // وظيفة نسخ الرابط إلى الحافظة
@@ -232,4 +237,4 @@
     // ينصح بتقييد الدعوات من خلال التحقق من الـ IP ومنع المحاولات المتكررة باستخدام حلول خادم مثل rate limiting.
   </script>
 </body>
-    </html>
+  </html>
