@@ -1,227 +1,73 @@
-<!DOCTYPE html>
-<html lang="ar">
+<!DOCTYPE html><html lang="ar">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>نظام الإحالة المُحسن - Telegram Mini App</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      direction: rtl;
-      text-align: center;
-      background-color: #f4f4f4;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 600px;
-      margin: 30px auto;
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #333;
-    }
-    .section {
-      margin-bottom: 30px;
-    }
-    .referral-link {
-      background: #e9ecef;
-      padding: 10px;
-      border-radius: 5px;
-      word-break: break-all;
-      margin-bottom: 10px;
-    }
-    .score {
-      font-size: 24px;
-      margin: 20px 0;
-    }
-    button, .share-btn {
-      padding: 10px 20px;
-      background: #007bff;
-      border: none;
-      color: #fff;
-      border-radius: 5px;
-      cursor: pointer;
-      margin: 5px;
-      text-decoration: none;
-      display: inline-block;
-    }
-    button:hover, .share-btn:hover {
-      background: #0056b3;
-    }
-    #adminPanel {
-      display: none;
-      border-top: 1px solid #ddd;
-      padding-top: 20px;
-      margin-top: 20px;
-    }
-    .toggle-admin {
-      background: #28a745;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام الإحالة</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: blue;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- قسم عرض رابط الإحالة وعدد الدعوات -->
-    <div class="section" id="referralSection">
-      <h1>نظام الإحالة</h1>
-      <p>رابط الإحالة الخاص بك:</p>
-      <div class="referral-link" id="referralLink">...</div>
-      <button id="copyButton">نسخ الرابط</button>
-      <div class="score">
-        عدد الدعوات: <span id="referralScore">0</span>
-      </div>
-      <!-- زر المشاركة على وسائل التواصل -->
-      <div>
-        <a href="#" id="shareFacebook" class="share-btn">شارك على فيسبوك</a>
-        <a href="#" id="shareTwitter" class="share-btn">شارك على تويتر</a>
-      </div>
-    </div>
+    <div class="container">
+        <h2>نظام الإحالة</h2>
+        <p>رابط الإحالة الخاص بك:</p>
+        <p id="referral-link">...</p>
+        <button onclick="copyReferralLink()">نسخ الرابط</button>
+        <h3>عدد الدعوات: <span id="referral-count">0</span></h3>
+    </div><script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
 
-    <!-- قسم لوحة تحكم الإدارة (للمشرفين) -->
-    <div class="section">
-      <button class="toggle-admin" id="toggleAdmin">عرض لوحة الإدارة</button>
-      <div id="adminPanel">
-        <h2>لوحة تحكم الإدارة</h2>
-        <p>هنا يمكن عرض إحصائيات تفصيلية عن الإحالات مثل:</p>
-        <ul id="adminStats">
-          <!-- مثال: سيتم تعبئتها ببيانات الإحصائيات عبر API -->
-          <li>إجمالي الدعوات: <span id="totalInvites">0</span></li>
-          <li>دعوات اليوم: <span id="todayInvites">0</span></li>
-          <li>أكثر القنوات فاعلية: <span id="topChannel">غير محدد</span></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // استخدام Telegram WebApp API إذا كان متوفرًا
-    const telegramWebApp = window.Telegram ? window.Telegram.WebApp : null;
-
-    // التحقق من بيانات المستخدم المرسلة من Telegram WebApp API
-    let userId = null;
-
-    if (telegramWebApp && telegramWebApp.initDataUnsafe && telegramWebApp.initDataUnsafe.user) {
-      userId = telegramWebApp.initDataUnsafe.user.id;
+    function generateReferralCode() {
+        return Math.floor(10000000 + Math.random() * 90000000).toString();
     }
 
-    // إذا لم يكن هناك معرف للمستخدم، يمكنك إظهار رسالة خطأ أو التعامل مع الموقف بطريقة أخرى
-    if (!userId) {
-      alert("لم يتم العثور على معرف المستخدم من Telegram.");
-      userId = 'unknownUser'; // معرّف افتراضي لحين التمكن من الحصول على بيانات المستخدم
-    }
-
-    // استرجاع معامل start من الرابط، وإذا لم يوجد يتم استخدام userId كرمز إحالة
-    const urlParams = new URLSearchParams(window.location.search);
-    let startParam = urlParams.get('start') || userId;
-
-    // تكوين رابط الإحالة للبوت (استخدام معرف البوت الخاص بك)
-    const referralLink = `https://t.me/XHasanCr59BOT?start=${startParam}`;
-    document.getElementById('referralLink').innerText = referralLink;
-
-    // وظيفة نسخ الرابط إلى الحافظة
-    document.getElementById('copyButton').addEventListener('click', function() {
-      navigator.clipboard.writeText(referralLink)
-        .then(() => {
-          alert('تم نسخ الرابط!');
-        })
-        .catch(err => {
-          alert('حدث خطأ أثناء النسخ');
+    let userId = tg.initDataUnsafe?.user?.id;
+    let referralCode = localStorage.getItem("referralCode") || generateReferralCode();
+    localStorage.setItem("referralCode", referralCode);
+    
+    let referralLink = `https://t.me/XHasanCr59BOT?start=${referralCode}`;
+    document.getElementById("referral-link").innerText = referralLink;
+    
+    function copyReferralLink() {
+        navigator.clipboard.writeText(referralLink).then(() => {
+            alert("تم نسخ الرابط!");
         });
-    });
-
-    // تحديث رابط المشاركة على وسائل التواصل مع الرابط الصحيح
-    document.getElementById('shareFacebook').setAttribute('href', `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}`);
-    document.getElementById('shareTwitter').setAttribute('href', `https://twitter.com/intent/tweet?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent('انضم إلى هذا البوت!')}`);
-
-    // عرض عدد الدعوات (score) في الوقت الحقيقي عبر WebSocket
-    let referralScore = 0;
-    const scoreEl = document.getElementById('referralScore');
-
-    // استدعاء API (REST) لجلب العدد الأولي للدعوات (يجب استبدال URL بالخاص بك)
-    function fetchReferralScore() {
-      fetch(`https://yourserver.com/api/getReferralScore?user=${startParam}`)
-        .then(response => response.json())
-        .then(data => {
-          referralScore = data.score;
-          scoreEl.innerText = referralScore;
-        })
-        .catch(err => console.error('Error fetching score:', err));
     }
 
-    // تحديث الإحصائيات الإدارية (مثال توضيحي)
-    function fetchAdminStats() {
-      fetch(`https://yourserver.com/api/getAdminStats?user=${startParam}`)
-        .then(response => response.json())
-        .then(data => {
-          document.getElementById('totalInvites').innerText = data.totalInvites;
-          document.getElementById('todayInvites').innerText = data.todayInvites;
-          document.getElementById('topChannel').innerText = data.topChannel;
-        })
-        .catch(err => console.error('Error fetching admin stats:', err));
+    let urlParams = new URLSearchParams(window.location.search);
+    let referrerCode = urlParams.get("start");
+    if (referrerCode) {
+        let referrals = JSON.parse(localStorage.getItem("referrals")) || {};
+        referrals[referrerCode] = (referrals[referrerCode] || 0) + 1;
+        localStorage.setItem("referrals", JSON.stringify(referrals));
     }
 
-    // استدعاء التحديث الأولي
-    fetchReferralScore();
-    fetchAdminStats();
+    let storedReferrals = JSON.parse(localStorage.getItem("referrals")) || {};
+    document.getElementById("referral-count").innerText = storedReferrals[referralCode] || 0;
+</script>
 
-    // إنشاء اتصال WebSocket للتحديثات الفورية (تأكد من استبدال ws://yourserver.com بالـ URL الخاص بخادم WebSocket)
-    const ws = new WebSocket('wss://yourserver.com/ws/referralUpdates?user=' + startParam);
-
-    ws.onopen = function() {
-      console.log('WebSocket connection established.');
-      // يمكن إرسال بيانات أولية إذا لزم الأمر، مثل التحقق من صلاحية المستخدم
-    };
-
-    ws.onmessage = function(event) {
-      // يفترض أن الخادم يرسل بيانات بصيغة JSON تتضمن score والتحديثات الأخرى
-      try {
-        const data = JSON.parse(event.data);
-        if (data.score !== undefined) {
-          referralScore = data.score;
-          scoreEl.innerText = referralScore;
-        }
-        // تحديث الإحصائيات الإدارية إن وُجدت
-        if (data.adminStats) {
-          document.getElementById('totalInvites').innerText = data.adminStats.totalInvites;
-          document.getElementById('todayInvites').innerText = data.adminStats.todayInvites;
-          document.getElementById('topChannel').innerText = data.adminStats.topChannel;
-        }
-      } catch (e) {
-        console.error('Error parsing WebSocket message:', e);
-      }
-    };
-
-    ws.onerror = function(error) {
-      console.error('WebSocket Error:', error);
-    };
-
-    ws.onclose = function() {
-      console.log('WebSocket connection closed.');
-      // يمكن إعادة محاولة الاتصال بعد فترة معينة إذا لزم الأمر
-    };
-
-    // زر لعرض أو إخفاء لوحة الإدارة (يمكن تأمينها برمز دخول لاحقاً)
-    document.getElementById('toggleAdmin').addEventListener('click', function() {
-      const adminPanel = document.getElementById('adminPanel');
-      if (adminPanel.style.display === 'none' || adminPanel.style.display === '') {
-        adminPanel.style.display = 'block';
-        // عند الفتح يتم تحديث الإحصائيات
-        fetchAdminStats();
-      } else {
-        adminPanel.style.display = 'none';
-      }
-    });
-
-    // إضافة آلية التحقق من الأمان للمشاركة
-    // قم بإضافة نظام CAPTCHA أو آلية تحقق من الروبوتات عند إرسال الدعوات
-    // يمكن تنفيذ ذلك باستخدام Google reCAPTCHA أو طرق أخرى للتحقق من صحة المستخدم.
-
-    // ملاحظة أمنية:
-    // ينصح بتقييد الدعوات من خلال التحقق من الـ IP ومنع المحاولات المتكررة باستخدام حلول خادم مثل rate limiting.
-  </script>
 </body>
 </html>
